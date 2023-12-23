@@ -1,0 +1,51 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model Question {
+  id           String    @id @default(uuid())
+  userId       String?
+  questionText String?   @db.Text()
+  answer       Answer?
+  imageUrl     String?   @db.Text
+  Category     Category? @relation(fields: [categoryId], references: [id])
+  categoryId   String?
+
+  @@index([categoryId])
+}
+
+model Answer {
+  id              String         @id @default(uuid())
+  correctAnswer   String?        @db.Text()
+  answerExplained String?        @db.Text()
+  questionId      String         @unique
+  question        Question       @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  answerOption    AnswerOption[]
+
+  @@index([questionId])
+}
+
+model AnswerOption {
+  id       String @id @default(uuid())
+  text     String @db.Text()
+  Answer   Answer @relation(fields: [answerId], references: [id])
+  answerId String
+
+  @@index([answerId])
+}
+
+model Category {
+  id   String @id @default(uuid())
+  name String @unique
+
+  question Question[]
+}
